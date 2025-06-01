@@ -19,12 +19,6 @@ void GyroScoper::begin() {
     while (true) delay(10);
   }
   Serial.println("MPU6050 Found!");
-  // mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
-  // mpu.setMotionDetectionThreshold(1);
-  // mpu.setMotionDetectionDuration(20);
-  // mpu.setInterruptPinLatch(true);
-  // mpu.setInterruptPinPolarity(true);
-  // mpu.setMotionInterrupt(true);
 
   mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
   Serial.print("Accelerometer range set to: ");
@@ -84,6 +78,13 @@ void GyroScoper::begin() {
     Serial.println("5 Hz");
     break;
   }
+
+  lastTime = millis();
+  
+  // Lecture initiale pour initialiser pitch et roll
+  mpu.getEvent(&a, &g, &temp);
+  pitch = computePitch(a.acceleration.x, a.acceleration.y, a.acceleration.z);
+  roll = computeRoll(a.acceleration.x, a.acceleration.y, a.acceleration.z);
 }
 
 /**
@@ -94,9 +95,23 @@ void GyroScoper::begin() {
  * roll (roulis) en radians.
  */
 void GyroScoper::updateGyro() {
-  mpu.getEvent(&a, &g, &temp);
-  pitch = computePitch(a.acceleration.x, a.acceleration.y, a.acceleration.z);
-  roll = computeRoll(a.acceleration.x, a.acceleration.y, a.acceleration.z);
+    mpu.getEvent(&a, &g, &temp);
+    
+    unsigned long currentTime = millis();
+    float dt = (currentTime - lastTime) / 1000.0; // dt en secondes
+    lastTime = currentTime;
+    
+    // Calcul des angles à partir de l'accéléromètre
+    pitchAcc = computePitch(a.acceleration.x, a.acceleration.y, a.acceleration.z);
+    rollAcc = computeRoll(a.acceleration.x, a.acceleration.y, a.acceleration.z);
+    
+    // Intégration du gyroscope
+    pitchGyro = pitch + g.gyro.y * dt * 180.0 / PI; // Conversion rad/s vers deg
+    rollGyro = roll + g.gyro.x * dt * 180.0 / PI;
+    
+    // Filtre complémentaire
+    pitch = alpha * pitchGyro + (1 - alpha) * pitchAcc;
+    roll = alpha * rollGyro + (1 - alpha) * rollAcc;
 }
 
 float GyroScoper::computePitch(int16_t ax, int16_t ay, int16_t az) {

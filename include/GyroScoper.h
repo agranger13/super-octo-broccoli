@@ -12,16 +12,19 @@ struct GyroData {
 
 class GyroScoper {
 public:
+  sensors_event_t a, g, temp;
+  float pitch; // en degrés
+  float roll;  // en degrés
   void begin();
   void updateGyro();
   void printGyro();
 
 private:
   Adafruit_MPU6050 mpu;
-  sensors_event_t a, g, temp;
-  float pitch; // en degrés
-  float roll;  // en degrés
-  
+  float pitchAcc, rollAcc;
+  float pitchGyro, rollGyro;
+  float alpha = 0.96; // Coefficient du filtre complémentaire
+  unsigned long lastTime;
   float computePitch(int16_t ax, int16_t ay, int16_t az);
   float computeRoll(int16_t ax, int16_t ay, int16_t az);
 };

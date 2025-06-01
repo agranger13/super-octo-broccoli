@@ -1,63 +1,46 @@
 #include <Arduino.h>
-#include <Hotspot.h>
 #include <UdpListener.h>
 #include <PIDController.h>
 #include <GyroScoper.h>
 #include <I2CScanner.h>
-#include <MotorController.h>
+#include <DroneController.h>
 
-
-Hotspot hotspot("NodeMCU_IOT", "123456789");
-UdpListener udpListener;
-// Kp, Ki, Kd, dt (en secondes)  
-PIDController rollPid(1.0, 0.5, 0.2, 0.01); // Rotation sur x
-PIDController pitchPid(1.0, 0.5, 0.2, 0.01); // Rotation sur y
-PIDController yawPid(1.0, 0.5, 0.2, 0.01); // Rotation sur z
-PIDController throttlePid(1.0, 0.5, 0.2, 0.01); // Altitude
-
-GyroScoper gyroScoper;
+// Configuration WiFi
+const char* ssid = "NodeMCU_IOT";
+const char* password = "123456789";
 
 #define M1 D5 // Avant Gauche
 #define M2 D6 // Avant Droite
-#define M3 D7 // Arriere Gauche
-#define M4 D8 // Arriere Droite
-MotorController motorController(D5, D6, D7 ,D8);
+#define M4 D7 // Arriere Gauche
+#define M3 D8 // Arriere Droite
+DroneController drone(M1, M2, M3, M4);
 
 void setup() {
   Serial.begin(9600);
   while (!Serial)
     delay(10);
 
-  if (hotspot.begin()) {
-    Serial.print("Hotspot démarré à : ");
-    Serial.println(hotspot.getIP());
-  } else {
-    Serial.println("Échec du démarrage du hotspot");
-  }
+  // Initialiser le drone (WiFi + UDP + IMU)
+  drone.begin(ssid, password);
 
-  if (udpListener.begin()) {
-    Serial.println("UDP en écoute !");
-  }
-
-  rollPid.setOutputLimits(-200, 200);
-
-  gyroScoper.begin();
-
-  motorController.stopAll();
+  // Réglages PID initiaux (à ajuster selon vos tests)
+  drone.tuneRollPID(1.2, 0.15, 0.08);
+  drone.tunePitchPID(1.2, 0.15, 0.08);
+  drone.tuneYawPID(2.5, 0.3, 0.1);
 }
 
 
 void loop()
 {
-  udpListener.listen();
-  gyroScoper.printGyro();
-
-  int i = 1;
-  if (i % 2 == 1) {
-    motorController.setSpeed(100, 100, 100, 100);
-  } else {
-    motorController.stopAll();
+  // Mise à jour automatique depuis les commandes UDP
+  drone.updateFromJoystick();
+  
+  // Debug (optionnel)
+  static unsigned long lastPrint = 0;
+  if (millis() - lastPrint > 100) {
+      lastPrint = millis();
+      Serial.print("Roll: "); Serial.print(drone.getRoll(), 2);
+      Serial.print(" Pitch: "); Serial.print(drone.getPitch(), 2);
+      Serial.print(" YawRate: "); Serial.println(drone.getYawRate(), 2);
   }
-
-  delay(1000);
 }
