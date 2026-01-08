@@ -5,7 +5,6 @@
 #include "MotorController.h"
 #include "GyroScoper.h"
 #include "UDPReceiver.h"
-#include <ESP8266WiFi.h>
 #include <Hotspot.h>
 
 class DroneController {

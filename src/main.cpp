@@ -2,17 +2,16 @@
 #include <UdpListener.h>
 #include <PIDController.h>
 #include <GyroScoper.h>
-#include <I2CScanner.h>
 #include <DroneController.h>
 
 // Configuration WiFi
-const char* ssid = "NodeMCU_IOT";
-const char* password = "123456789";
+const char* ssid = "DRONE_IOT";
+const char* password = "dronepassword";
 
-#define M1 D5 // Avant Gauche
-#define M2 D6 // Avant Droite
-#define M4 D7 // Arriere Gauche
-#define M3 D8 // Arriere Droite
+#define M1 D10 // Avant Gauche
+#define M2 D11 // Avant Droite
+#define M4 D12 // Arriere Gauche
+#define M3 D13 // Arriere Droite
 DroneController drone(M1, M2, M3, M4);
 
 void setup() {

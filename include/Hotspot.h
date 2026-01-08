@@ -1,7 +1,9 @@
-#ifndef WIFI_HOTSPOT_H
-#define WIFI_HOTSPOT_H
-
-#include <ESP8266WiFi.h>
+#include <stdio.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "sdkconfig.h"
+#include <Arduino.h>
+#include <WiFi.h>
 
 class Hotspot {
 public:
@@ -20,5 +22,3 @@ private:
     IPAddress gateway;
     IPAddress subnet;
 };
-
-#endif

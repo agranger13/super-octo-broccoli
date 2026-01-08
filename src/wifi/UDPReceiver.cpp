@@ -52,6 +52,29 @@ void UDPReceiver::parsePacket(char* buffer, int length) {
     // Format JSON simple: {"lx":512,"ly":480,"rx":500,"ry":100,"arm":1,"emg":0}
     // ou format CSV: 512,480,500,100,1,0
     
+    // Mapping des commandes joystick :
+
+    // Left Stick X (leftX) → Roll (-30° à +30°)
+    // Left Stick Y (leftY) → Pitch (-30° à +30°)
+    // Right Stick X (rightX) → Yaw (-180°/s à +180°/s)
+    // Right Stick Y (rightY) → Throttle (0 à 200/255)
+    // Armed → Bouton armement (0/1)
+    // Emergency → Bouton d'urgence (0/1)
+
+    // Valeurs joystick typiques :
+
+    // Centre : 512 (sur une échelle 0-1023)
+    // Zone morte : ±20 autour du centre
+    // Plage complète : 0-1023
+
+    // Fonctionnalités de sécurité :
+
+    // Timeout : Arrêt automatique si pas de signal pendant 1 seconde
+    // Désarmement automatique : En cas de perte de connexion
+    // Arrêt d'urgence : Bouton emergency = 1
+    // Zone morte : Évite les micro-mouvements involontaires
+    
+
     // Méthode 1: Format CSV (plus simple)
     if (strchr(buffer, ',') != nullptr) {
         int values[6];
