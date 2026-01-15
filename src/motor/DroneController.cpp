@@ -32,6 +32,7 @@ void DroneController::begin(const char* ssid, const char* password) {
     gyroScoper.begin();
 }
 
+
 void DroneController::updateFromJoystick() {
     // Mise à jour des données UDP
     udpReceiver.update();
@@ -110,7 +111,16 @@ void DroneController::updateControl() {
     motor2Speed = constrain(motor2Speed, 0, 255);
     motor3Speed = constrain(motor3Speed, 0, 255);
     motor4Speed = constrain(motor4Speed, 0, 255);
+
+    Serial.print("M1: "); Serial.print(motor1Speed);
+    Serial.print(" M2: ");  Serial.print(motor2Speed);      
+    Serial.print(" M3: ");  Serial.print(motor3Speed);
+    Serial.print(" M4: ");  Serial.println(motor4Speed);
     
+    motor1Speed = 100;
+    motor2Speed = 100;
+    motor3Speed = 100;
+    motor4Speed = 100;
     // Envoyer les commandes aux moteurs
     motorController.setSpeed(motor1Speed, motor2Speed, motor3Speed, motor4Speed);
 }

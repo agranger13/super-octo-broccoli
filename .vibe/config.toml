@@ -1,0 +1,21 @@
+# .vibe/config.toml (dans ton projet IoT)
+active_model = "devstral-2"
+
+# Limiter la mémoire contextuelle si le projet est très gros
+context_size = 32768
+
+# Désactiver les outils non pertinents
+disabled_tools = ["search"]
+
+# Autorisations par défaut
+[tools.read_file]
+permission = "always"
+
+[tools.search_replace]
+permission = "ask"
+
+[tools.write_file]
+permission = "ask"
+
+[tools.bash]
+permission = "ask"

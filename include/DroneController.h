@@ -11,7 +11,7 @@ class DroneController {
 private:
     MotorController motorController;
     GyroScoper gyroScoper;
-    UDPReceiver udpReceiver;
+    
     PIDController rollPID;
     PIDController pitchPID;
     PIDController yawPID;
@@ -26,7 +26,7 @@ private:
 
 public:
     DroneController(int m1, int m2, int m3, int m4, unsigned int udpPort = 4210);
-    
+    UDPReceiver udpReceiver;
     void begin(const char* ssid, const char* password); // WiFi + IMU
     void updateFromJoystick(); // Lecture UDP et mise à jour contrôle
     void setSetpoints(float rollSP, float pitchSP, float yawSP, float throttleSP);
@@ -46,6 +46,7 @@ public:
     // État du drone
     bool isArmed() { return armed; }
     bool isConnected() { return udpReceiver.isConnected(); }
+
 };
 
 #endif

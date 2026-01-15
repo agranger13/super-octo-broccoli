@@ -8,10 +8,10 @@
 const char* ssid = "DRONE_IOT";
 const char* password = "dronepassword";
 
-#define M1 D10 // Avant Gauche
-#define M2 D11 // Avant Droite
-#define M4 D12 // Arriere Gauche
-#define M3 D13 // Arriere Droite
+#define M1 D2 // Avant Gauche
+#define M2 D3 // Avant Droite
+#define M4 D5 // Arriere Gauche
+#define M3 D6 // Arriere Droite
 DroneController drone(M1, M2, M3, M4);
 
 void setup() {
@@ -36,10 +36,13 @@ void loop()
   
   // Debug (optionnel)
   static unsigned long lastPrint = 0;
-  if (millis() - lastPrint > 100) {
+  if (millis() - lastPrint > 1000) {
       lastPrint = millis();
       Serial.print("Roll: "); Serial.print(drone.getRoll(), 2);
       Serial.print(" Pitch: "); Serial.print(drone.getPitch(), 2);
       Serial.print(" YawRate: "); Serial.println(drone.getYawRate(), 2);
+      Serial.print("Armed: "); Serial.print(drone.isArmed() ? "Yes" : "No");
+      Serial.print(" Connected: "); Serial.println(drone.isConnected() ? "Yes" : "No");
+      Serial.print("Info udp: "); drone.udpReceiver.printData();
   }
 }

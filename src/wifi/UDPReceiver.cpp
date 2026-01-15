@@ -24,6 +24,7 @@ void UDPReceiver::initSafeData() {
     safeData.emergency = false;
 }
 
+
 bool UDPReceiver::update() {
     int packetSize = udp.parsePacket();
     
