@@ -7,20 +7,27 @@
 #include "UDPReceiver.h"
 #include <Hotspot.h>
 
+// Limites de vol
+static constexpr float MAX_ROLL_ANGLE = 30.0f;   // Angle max roll (degrés)
+static constexpr float MAX_PITCH_ANGLE = 30.0f;  // Angle max pitch (degrés)
+static constexpr float MAX_YAW_RATE = 180.0f;    // Vitesse angulaire max (degrés/s)
+static constexpr float MAX_THROTTLE = 200.0f;    // Throttle max (sur 255)
+
 class DroneController {
 private:
     MotorController motorController;  // Contrôleur des moteurs
     GyroScoper gyroScoper;            // Capteur gyroscopique
-    
+    UDPReceiver udpReceiver;          // Récepteur UDP pour les commandes
+
     PIDController rollPID;           // Contrôleur PID pour le roll
     PIDController pitchPID;          // Contrôleur PID pour le pitch
     PIDController yawPID;            // Contrôleur PID pour le yaw
-    
+
     float rollSetpoint;              // Consigne de roll (degrés)
     float pitchSetpoint;             // Consigne de pitch (degrés)
     float yawSetpoint;               // Consigne de yaw (degrés/s)
     float throttle;                  // Consigne de throttle (0-255)
-    
+
     bool armed;                      // État armé/désarmé du drone
     bool emergencyStop;              // Indicateur d'arrêt d'urgence
 
@@ -34,9 +41,7 @@ public:
      * @param udpPort Port UDP pour la réception des commandes (par défaut: 4210)
      */
     DroneController(int m1, int m2, int m3, int m4, unsigned int udpPort = 4210);
-    
-    UDPReceiver udpReceiver;         // Récepteur UDP pour les commandes
-    
+
     /**
      * Initialise le drone (WiFi, UDP, IMU)
      * @param ssid SSID du réseau WiFi

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(platformio run:*)",
+      "Bash(pio run:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(python -m platformio test:*)",
+      "Bash(where pio:*)",
+      "Bash(where:*)"
+    ]
+  }
+}
