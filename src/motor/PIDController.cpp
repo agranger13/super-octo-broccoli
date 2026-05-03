@@ -1,4 +1,5 @@
 #include "PIDController.h"
+#include <algorithm>
 
 PIDController::PIDController(float kp, float ki, float kd, float dt)
     : kp(kp), ki(ki), kd(kd), dt(dt), integral(0), previousError(0),
@@ -22,15 +23,15 @@ void PIDController::reset() {
 
 float PIDController::compute(float setpoint, float input) {
     float error = setpoint - input;
-    integral += error * dt;
+
+    // Anti-windup : limiter l'intégrale directement
+    float integralMax = outputMax / (ki > 0 ? ki : 1.0f);
+    float integralMin = outputMin / (ki > 0 ? ki : 1.0f);
+    integral = std::max(integralMin, std::min(integralMax, integral + error * dt));
+
     float derivative = (error - previousError) / dt;
     previousError = error;
 
     float output = kp * error + ki * integral + kd * derivative;
-
-    // Saturation (anti-windup partiel)
-    if (output > outputMax) output = outputMax;
-    else if (output < outputMin) output = outputMin;
-
-    return output;
+    return std::max(outputMin, std::min(outputMax, output));
 }

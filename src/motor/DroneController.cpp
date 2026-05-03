@@ -75,6 +75,15 @@ void DroneController::updateControl() {
     // Cette méthode calcule les sorties PID et envoie les commandes aux moteurs
     // Elle est appelée par updateFromJoystick() lorsque le drone est armé
 
+    // Pas de correction PID sous le seuil de vol (évite l'accumulation intégrale au sol)
+    if (throttle < 20) {
+        rollPID.reset();
+        pitchPID.reset();
+        yawPID.reset();
+        motorController.setSpeed(throttle, throttle, throttle, throttle);
+        return;
+    }
+
     // Lecture des données IMU
     // Cette méthode met à jour les angles de roll, pitch et la vitesse angulaire
     // Elle doit être appelée régulièrement pour obtenir des données précises
@@ -85,7 +94,7 @@ void DroneController::updateControl() {
     // Elles représentent l'état actuel du drone
     float rollAngle = gyroScoper.roll;      // Angle de roll en degrés
     float pitchAngle = gyroScoper.pitch;     // Angle de pitch en degrés
-    float yawRate = gyroScoper.g.gyro.z;     // Vitesse angulaire en rad/s
+    float yawRate = gyroScoper.g.gyro.z * 180.0f / PI;  // Conversion rad/s → deg/s
 
     // Calcul des sorties PID
     // Les contrôleurs PID calculent la correction nécessaire pour atteindre la consigne

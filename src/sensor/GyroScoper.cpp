@@ -173,7 +173,7 @@ void GyroScoper::updateGyro() {
  * @param az Valeur de l'accéléromètre sur l'axe Z.
  * @return Angle de pitch en degrés.
  */
-float GyroScoper::computePitch(int16_t ax, int16_t ay, int16_t az) {
+float GyroScoper::computePitch(float ax, float ay, float az) {
   return atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / PI;
 }
 
@@ -186,7 +186,7 @@ float GyroScoper::computePitch(int16_t ax, int16_t ay, int16_t az) {
  * @param az Valeur de l'accéléromètre sur l'axe Z.
  * @return Angle de roll en degrés.
  */
-float GyroScoper::computeRoll(int16_t ax, int16_t ay, int16_t az) {
+float GyroScoper::computeRoll(float ax, float ay, float az) {
   return atan2(ay, az) * 180.0 / PI;
 }
 

@@ -40,8 +40,8 @@ private:
   float pitchGyro, rollGyro; /**< Angles de pitch et roll calculés à partir du gyroscope. */
   float alpha = 0.96; /**< Coefficient du filtre complémentaire pour fusionner les données de l'accéléromètre et du gyroscope. */
   unsigned long lastTime; /**< Dernière fois que les données ont été mises à jour. */
-  float computePitch(int16_t ax, int16_t ay, int16_t az); /**< Calcule l'angle de pitch à partir des données de l'accéléromètre. */
-  float computeRoll(int16_t ax, int16_t ay, int16_t az);
+  float computePitch(float ax, float ay, float az);
+  float computeRoll(float ax, float ay, float az);
   void scanI2C();
   /**< Calcule l'angle de roll à partir des données de l'accéléromètre. */
 };
