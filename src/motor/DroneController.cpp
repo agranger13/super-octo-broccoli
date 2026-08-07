@@ -19,6 +19,10 @@ DroneController::DroneController(int m1, int m2, int m3, int m4, unsigned int ud
 }
 
 void DroneController::begin(const char* ssid, const char* password) {
+    // Initialisation des sorties PWM en premier : les moteurs sont mis à
+    // l'arrêt avant toute autre initialisation
+    motorController.begin();
+
     Hotspot hotspot(ssid, password);
 
     // Connexion WiFi
@@ -36,10 +40,40 @@ void DroneController::updateFromJoystick() {
     udpReceiver.update();
     JoystickData joy = udpReceiver.getData();
 
+    // Trace de diagnostic : signale uniquement les changements d'état,
+    // pour ne pas saturer le port série à chaque tour de boucle
+    static bool prevArmed = false;
+    static bool prevConnected = false;
+    bool nowConnected = udpReceiver.isConnected();
+    if (nowConnected != prevConnected) {
+        Serial.print("[LIEN] "); Serial.println(nowConnected ? "CONNECTE" : "PERDU (timeout)");
+        prevConnected = nowConnected;
+    }
+    if (joy.armed != prevArmed) {
+        Serial.print("[ARM] joystick demande: "); Serial.println(joy.armed ? "ARME" : "DESARME");
+        prevArmed = joy.armed;
+    }
+
     // Vérifications de sécurité
-    if (joy.emergency || !udpReceiver.isConnected()) {
+    if (joy.emergency || !nowConnected) {
         emergency();
         return;
+    }
+
+    // Sortie du verrou d'urgence : uniquement si le lien est rétabli, que
+    // l'urgence est relâchée ET que le joystick est revenu au neutre désarmé.
+    // On impose ce passage par "désarmé" pour interdire un redémarrage
+    // spontané des moteurs avec du gaz déjà appliqué.
+    if (emergencyStop) {
+        if (!joy.armed) {
+            emergencyStop = false;
+            Serial.println("[ARM] verrou d'urgence relache - pret a armer");
+        } else {
+            // Toujours verrouillé : moteurs à l'arrêt tant que l'opérateur
+            // n'a pas remis l'armement à zéro
+            motorController.stopAll();
+            return;
+        }
     }
 
     // Mise à jour de l'état armé

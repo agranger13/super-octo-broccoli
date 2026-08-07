@@ -28,6 +28,7 @@ private:
     unsigned int localPort;                         // Port d'écoute UDP
     char packetBuffer[PACKET_BUFFER_SIZE];         // Buffer de réception des données
     unsigned long lastPacketTime;                   // Timestamp du dernier paquet reçu (millis)
+    bool hasReceived;                               // Vrai dès le premier paquet valide reçu
     
     JoystickData currentData;                       // Données actuelles du joystick
     JoystickData safeData;                         // Données de sécurité (utilisées en cas de timeout)

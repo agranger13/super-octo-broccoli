@@ -8,8 +8,11 @@ UDPReceiver::UDPReceiver(unsigned int port) : localPort(port) {
     initSafeData();
     // Initialise les données actuelles avec les valeurs de sécurité
     currentData = safeData;
-    // Initialise le timestamp du dernier paquet reçu
+    // Aucun paquet reçu au démarrage : on antidate pour que isConnected()
+    // soit faux dès le boot, sinon le lien est considéré actif pendant les
+    // TIMEOUT_MS premières millisecondes alors que rien n'a jamais été reçu.
     lastPacketTime = 0;
+    hasReceived = false;
 }
 
 void UDPReceiver::begin() {
@@ -38,10 +41,15 @@ bool UDPReceiver::update() {
         int length = udp.read(packetBuffer, sizeof(packetBuffer) - 1);
         if (length > 0) {  // Vérifier que la lecture a réussi
             packetBuffer[length] = '\0';
-            
+
+            // Trace de diagnostic : contenu brut et expéditeur
+            Serial.print("[UDP] "); Serial.print(udp.remoteIP());
+            Serial.print(" -> \""); Serial.print(packetBuffer); Serial.println("\"");
+
             // Parse les données du paquet
             parsePacket(packetBuffer, length);
             lastPacketTime = millis();
+            hasReceived = true;
             return true;
         }
     }
@@ -155,7 +163,7 @@ JoystickData UDPReceiver::getData() {
 bool UDPReceiver::isConnected() {
     // Vérifie si la connexion UDP est active
     // Retourne true si le dernier paquet a été reçu il y a moins de TIMEOUT_MS
-    return (millis() - lastPacketTime) < TIMEOUT_MS;
+    return hasReceived && (millis() - lastPacketTime) < TIMEOUT_MS;
 }
 
 void UDPReceiver::printData() {

@@ -6,19 +6,20 @@
 class MotorController {
 private:
   int pinM1, pinM2, pinM3, pinM4;
-  
-  // Canaux PWM (ESP32 a 16 canaux: 0-15)
-  const int channelM1 = 0;
-  const int channelM2 = 1;
-  const int channelM3 = 2;
-  const int channelM4 = 3;
-  
+
   // Configuration PWM
-  const int freq = 20000;      // Fréquence 5kHz (bon pour moteurs DC)
+  // Depuis le core Arduino-ESP32 3.x, les canaux LEDC sont alloués
+  // automatiquement : on pilote directement par numéro de broche.
+  const int freq = 20000;      // Fréquence 20kHz (au-dessus de l'audible)
   const int resolution = 8;    // Résolution 8-bit (0-255)
 
 public:
   MotorController(int m1, int m2, int m3, int m4);
+
+  // Configure les sorties PWM. À appeler depuis setup(), jamais depuis un
+  // constructeur global : le périphérique LEDC n'est pas prêt avant.
+  bool begin();
+
   void setSpeed(int m1, int m2, int m3, int m4);
   void stopAll();
 };

@@ -4,6 +4,7 @@
 #include <GyroScoper.h>
 #include <DroneController.h>
 #include <DroneLogger.h>
+#include <BoardPins.h>
 
 // Configuration WiFi
 const char* ssid = "DRONE_IOT";
@@ -16,10 +17,11 @@ const char* password = "dronepassword";
 //     X
 //   M4   M3
 //   ARRIERE
-#define M1 D2 // Moteur 1 - Avant Gauche (sens horaire)
-#define M2 D3 // Moteur 2 - Avant Droite (sens anti-horaire)
-#define M3 D6 // Moteur 3 - Arrière Droite (sens horaire)
-#define M4 D5 // Moteur 4 - Arrière Gauche (sens anti-horaire)
+// Les broches réelles dépendent de la carte cible, voir include/BoardPins.h
+#define M1 MOTOR_M1_PIN // Moteur 1 - Avant Gauche (sens horaire)
+#define M2 MOTOR_M2_PIN // Moteur 2 - Avant Droite (sens anti-horaire)
+#define M3 MOTOR_M3_PIN // Moteur 3 - Arrière Droite (sens horaire)
+#define M4 MOTOR_M4_PIN // Moteur 4 - Arrière Gauche (sens anti-horaire)
 DroneController drone(M1, M2, M3, M4);
 DroneLogger logger(drone);
 

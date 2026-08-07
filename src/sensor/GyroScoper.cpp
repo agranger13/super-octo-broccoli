@@ -1,4 +1,5 @@
 #include "GyroScoper.h"
+#include "BoardPins.h"
 
 /**
  * @brief Initialisation du gyroscope.
@@ -15,47 +16,41 @@
  */
 void GyroScoper::begin() {
   Serial.println("=== MPU6050 INITIALIZATION ===");
-  
+  Serial.print("Board: "); Serial.println(BOARD_NAME);
+
   // Test avec différentes configurations I2C
   bool i2cSuccess = false;
-  
-  // Configuration 1: Broches par défaut
-  Serial.println("Testing default I2C pins...");
-  Wire.begin(SDA, SCL);
+
+  // Configuration 1: Broches I2C matérielles par défaut de la carte
+  Serial.print("Testing default I2C pins (SDA=");
+  Serial.print(MPU_SDA_PIN); Serial.print(", SCL=");
+  Serial.print(MPU_SCL_PIN); Serial.println(")...");
+  Wire.begin(MPU_SDA_PIN, MPU_SCL_PIN);
   scanI2C();
-  
+
   if (!mpu.begin()) {
-    Serial.println("Failed with default pins. Trying alternative configurations...");
-    
-    // Configuration 2: Autres broches courantes sur ESP32
-    Serial.println("Testing alternative I2C pins (D3, D5)...");
-    Wire.begin(D3, D5);
+    Serial.println("Failed with default pins. Trying alternative configuration...");
+
+    // Configuration 2: broches de repli, choisies pour ne jamais entrer en
+    // conflit avec les sorties PWM des moteurs (voir include/BoardPins.h)
+    Serial.print("Testing alternative I2C pins (SDA=");
+    Serial.print(MPU_SDA_ALT); Serial.print(", SCL=");
+    Serial.print(MPU_SCL_ALT); Serial.println(")...");
+    Wire.begin(MPU_SDA_ALT, MPU_SCL_ALT);
     scanI2C();
-    
+
     if (!mpu.begin()) {
-      Serial.println("Failed with alternative pins. Trying another configuration...");
-      
-      // Configuration 3: Autres broches
-      Serial.println("Testing another I2C configuration (D6, D7)...");
-      Wire.begin(D6, D7);
-      scanI2C();
-      
-      if (!mpu.begin()) {
-        Serial.println("CRITICAL: MPU6050 not found on any configuration!");
-        Serial.println("Please check:");
-        Serial.println("1. Physical wiring (SDA, SCL, VCC, GND)");
-        Serial.println("2. Power supply (try both 3.3V and 5V)");
-        Serial.println("3. I2C pull-up resistors (4.7K ohm between SDA/SCL and VCC)");
-        Serial.println("4. MPU6050 module functionality (try on another board)");
-        Serial.println("5. Correct I2C address (should be 0x68 or 0x69)");
-        while (true) delay(10);
-      } else {
-        i2cSuccess = true;
-        Serial.println("SUCCESS: MPU6050 found on alternative pins D6, D7");
-      }
+      Serial.println("CRITICAL: MPU6050 not found on any configuration!");
+      Serial.println("Please check:");
+      Serial.println("1. Physical wiring (SDA, SCL, VCC, GND)");
+      Serial.println("2. Power supply (try both 3.3V and 5V)");
+      Serial.println("3. I2C pull-up resistors (4.7K ohm between SDA/SCL and VCC)");
+      Serial.println("4. MPU6050 module functionality (try on another board)");
+      Serial.println("5. Correct I2C address (should be 0x68 or 0x69)");
+      while (true) delay(10);
     } else {
       i2cSuccess = true;
-      Serial.println("SUCCESS: MPU6050 found on alternative pins D4, D5");
+      Serial.println("SUCCESS: MPU6050 found on alternative pins");
     }
   } else {
     i2cSuccess = true;
@@ -85,10 +80,9 @@ void::GyroScoper::scanI2C() {
   int nDevices = 0;
 
   Serial.println("=== I2C SCAN DEBUG ===");
+  // Les broches utilisées sont affichées par begin() avant chaque scan
   Serial.println("Scanning I2C bus for devices...");
-  Serial.print("Using SDA: "); Serial.print(SDA);
-  Serial.print(", SCL: "); Serial.println(SCL);
-  
+
   for (address = 1; address < 127; address++) {
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
